@@ -26,6 +26,7 @@ static uint16_t port = 80;                                      // Use port 80 -
 
 ETHER_28J60 ethernet;
 void setup() {
+  Serial.begin(9600);
   ethernet.setup(mac, ip, port); // setup connection
   
   // Start up the library
@@ -33,12 +34,12 @@ void setup() {
 }
 
 void loop() {
-  float temp;
+  double temp;
   sensors.requestTemperatures(); // Send the command to get temperatures
   temp = sensors.getTempCByIndex(0);
   if (ethernet.serviceRequest())
   {
-    ethernet.print("<H1>Current temperature from sensor 0</H1><br>");
+    ethernet.print("<H3>Температура на датчике: </H3>");
     ethernet.print(temp);
     ethernet.respond();
   }
