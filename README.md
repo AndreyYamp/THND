@@ -5,3 +5,5 @@ This project aimed to gather experience in Arduino programming and make cheap an
 This device has a web-server to monitor values.
 The web-server works only in local network at the moment with IP: 192.168.0.115.
 Device includes only digital temperature sensor DS18B20 therefore web-server can monitor the temperature only.
+
+To use ETHER_28J60 library it should be moved to .zip archive before and then added to Arduino IDE.
