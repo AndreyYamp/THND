@@ -1,19 +1,22 @@
+#include <Temboo.h>
+
 // Include libraries for ethernet shield
 #include <UIPEthernet.h>
 // Include libraries for digital temperature sensor
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include <math.h>
+// Include libraries for IoT (sending an email)
+#include "TembooAccount.h" // Contains Temboo account information
 
-// Data wire is plugged into port 2 on the Arduino
-#define ONE_WIRE_BUS 2
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
-OneWire oneWire(ONE_WIRE_BUS);
-// Pass our oneWire reference to Dallas Temperature. 
-DallasTemperature sensors(&oneWire);
+#define UPPER_TEMP_LIMIT 40
+#define LOWER_TEMP_LIMIT 1
+#define ANALOG_INPUT 0
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte ethernetMACAddress[] = ETHERNET_SHIELD_MAC;
+
+String message = "";
+String senderEmail = "thnd.info@gmail.com";
   
 IPAddress ip(192,168,0,115);
 
@@ -22,25 +25,86 @@ IPAddress ip(192,168,0,115);
 // (port 80 is default for HTTP):
 EthernetServer server(80);
 
+// returns true if everything is ok, otherwise - false
+boolean checkTemperature(double temp)
+{
+  boolean result = true;
+  if (temp >= UPPER_TEMP_LIMIT || temp <= LOWER_TEMP_LIMIT){
+    message = "Hello! This is notification from Arduino THND!\nTemperature limit exceeded: " + String(temp);
+    result = false;
+  }
+  else{
+    message = "";
+    result = true;
+  }
+  return result;
+}
+
+double calcTemp(int rawVal){
+  double tempAn;
+  tempAn = log(10000.0*((1024.0/rawVal - 1))); 
+  tempAn = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * tempAn * tempAn ))* tempAn );
+  tempAn = tempAn - 273.15;
+
+  return tempAn;
+}
+
+void sendEmail(EthernetClient client){
+
+  TembooChoreo SendEmailChoreo(client);
+  // Invoke the Temboo client
+  SendEmailChoreo.begin();
+
+  // Set Temboo account credentials
+  SendEmailChoreo.setAccountName(TEMBOO_ACCOUNT);
+  SendEmailChoreo.setAppKeyName(TEMBOO_APP_KEY_NAME);
+  SendEmailChoreo.setAppKey(TEMBOO_APP_KEY);
+
+  // Set Choreo inputs
+  String FromAddressValue = senderEmail;
+  SendEmailChoreo.addInput("FromAddress", FromAddressValue);
+  String UsernameValue = senderEmail;
+  SendEmailChoreo.addInput("Username", UsernameValue);
+  String ToAddressValue = "andrey.yampolskiy@gmail.com,giesmo.home@gmail.com";
+  SendEmailChoreo.addInput("ToAddress", ToAddressValue);
+  String SubjectValue = "Warning!";
+  SendEmailChoreo.addInput("Subject", SubjectValue);
+  String PasswordValue = "yofkmsrxkpoklbth";
+  SendEmailChoreo.addInput("Password", PasswordValue);
+  String MessageBodyValue = message;
+  SendEmailChoreo.addInput("MessageBody", MessageBodyValue);
+
+  // Identify the Choreo to run
+  SendEmailChoreo.setChoreo("/Library/Google/Gmail/SendEmail");
+
+  // Run the Choreo; when results are available, print them to serial
+  SendEmailChoreo.run();
+
+//  while(SendEmailChoreo.available()) {
+//    char c = SendEmailChoreo.read();
+//     Serial.print(c);
+//  }
+  SendEmailChoreo.close();
+}
+
 void setup() {
- // Open serial communications:
+  // Open serial communications:
   Serial.begin(9600);
   // start the Ethernet connection and the server:
-  Ethernet.begin(mac, ip);
+  Ethernet.begin(ethernetMACAddress, ip);
   server.begin();
-  Serial.print("server is at ");
-  Serial.println(Ethernet.localIP());
-
-  sensors.begin();
+//  Serial.print("server is at ");
+//  Serial.println(Ethernet.localIP());
 }
 
 void loop() {
   double temp;
+  int analogVal;
 
   // listen for incoming clients
   EthernetClient client = server.available();
   if (client) {
-    Serial.println("new client");
+//    Serial.println("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
     while (client.connected()) {
@@ -59,11 +123,15 @@ void loop() {
           client.println();
           client.println("<!DOCTYPE HTML>");
           client.println("<html>");
-          // output the value of digital temperature sensor
-          sensors.requestTemperatures(); // Send the command to get temperatures
-          temp = sensors.getTempCByIndex(0);
-          client.print("Текущая температура (Current temperature) ");
+          // output the value of analog temperature sensor
+          analogVal = analogRead(ANALOG_INPUT);
+          temp = calcTemp(analogVal);
+          boolean tempCheck = checkTemperature(temp);
+          client.print("Current temperature: ");
           client.print(temp);
+          if (tempCheck == false){
+            sendEmail(client);
+          }
           client.println("<br />");       
           client.println("</html>");
           break;
@@ -82,6 +150,6 @@ void loop() {
     delay(1);
     // close the connection:
     client.stop();
-    Serial.println("client disonnected");
+//    Serial.println("client disonnected");
   }
 }
