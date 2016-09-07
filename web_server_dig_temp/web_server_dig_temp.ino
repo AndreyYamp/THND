@@ -16,7 +16,7 @@
 byte ethernetMACAddress[] = ETHERNET_SHIELD_MAC;
 
 String message = "";
-String senderEmail = "thnd.info@gmail.com";
+String senderEmail = "put here email of the sender";
   
 IPAddress ip(192,168,0,115);
 
@@ -65,11 +65,11 @@ void sendEmail(EthernetClient client){
   SendEmailChoreo.addInput("FromAddress", FromAddressValue);
   String UsernameValue = senderEmail;
   SendEmailChoreo.addInput("Username", UsernameValue);
-  String ToAddressValue = "andrey.yampolskiy@gmail.com,giesmo.home@gmail.com";
+  String ToAddressValue = "put here email of recipient";
   SendEmailChoreo.addInput("ToAddress", ToAddressValue);
   String SubjectValue = "Warning!";
   SendEmailChoreo.addInput("Subject", SubjectValue);
-  String PasswordValue = "yofkmsrxkpoklbth";
+  String PasswordValue = "password here";
   SendEmailChoreo.addInput("Password", PasswordValue);
   String MessageBodyValue = message;
   SendEmailChoreo.addInput("MessageBody", MessageBodyValue);
