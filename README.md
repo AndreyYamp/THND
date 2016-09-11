@@ -10,9 +10,10 @@ Signal from thermistor converted with Steinhart–Hart equation.
 The application sports anti-spam logic that prevents notification spam in case of longer sensor triggering.
 
 Hardware:
-
 Arduino Mega 2560
+
 Ethernet shield based on ENC28J60
+
 Analog temperature sensor MF52E B 3950K with 10Kohm resistor
 
 To use arduino_uip-master and Temboo libraries they should be moved to .zip archive before and then added to Arduino IDE separately.
