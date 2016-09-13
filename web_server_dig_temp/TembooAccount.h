@@ -8,7 +8,7 @@ and copy this content into it.
 
 #define TEMBOO_ACCOUNT "thnd"  // Your Temboo account name 
 #define TEMBOO_APP_KEY_NAME "THND"  // Your Temboo app key name
-#define TEMBOO_APP_KEY "sF0BLGvtil9Yr6Mn0SCpAGtQG82Uex9c"  // Your Temboo app key
+#define TEMBOO_APP_KEY "your temboo key"  // Your Temboo app key
 
 #define ETHERNET_SHIELD_MAC {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}
 
