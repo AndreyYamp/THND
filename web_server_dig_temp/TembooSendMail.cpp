@@ -7,8 +7,8 @@
 #include "TembooSendMail.h"
 
 String senderEmail = "thnd.info@gmail.com";
-String recipients = "andrey.yampolskiy@gmail.com,giesmo.home@gmail.com";
-String password = "yofkmsrxkpoklbth";
+String recipients = "recipient's emails";
+String password = "password";
 
 /*
 ###############################################################################
